@@ -46,9 +46,14 @@ onUnmounted(() => {
   <!-- Hidden SVG filters for watermark effect -->
   <svg width="0" height="0" style="position: absolute;" aria-hidden="true">
     <defs>
-      <filter id="wm-dissolve">
-        <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="2" stitchTiles="stitch" result="noise" />
-        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
+      <filter id="wm-dissolve" color-interpolation-filters="sRGB">
+        <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" result="noise" />
+        <feColorMatrix in="noise" type="matrix"
+          values="0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 0 0
+                  0 0 0 4 -1.5" result="grain" />
+        <feComposite in="SourceGraphic" in2="grain" operator="in" />
       </filter>
     </defs>
   </svg>
