@@ -47,12 +47,12 @@ onUnmounted(() => {
   <svg width="0" height="0" style="position: absolute;" aria-hidden="true">
     <defs>
       <filter id="wm-dissolve" color-interpolation-filters="sRGB">
-        <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" result="noise" />
+        <feTurbulence type="fractalNoise" baseFrequency="0.65" numOctaves="3" stitchTiles="stitch" result="noise" />
         <feColorMatrix in="noise" type="matrix"
           values="0 0 0 0 0
                   0 0 0 0 0
                   0 0 0 0 0
-                  0 0 0 4 -1.5" result="grain" />
+                  0 0 0 2.5 -0.8" result="grain" />
         <feComposite in="SourceGraphic" in2="grain" operator="in" />
       </filter>
     </defs>
