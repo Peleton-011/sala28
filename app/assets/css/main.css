@@ -58,10 +58,11 @@ body {
   inset: 0;
   pointer-events: none;
   z-index: 9999;
-  opacity: var(--grain-opacity);
-  mix-blend-mode: multiply;
+  opacity: 0.11;
+  mix-blend-mode: overlay;
+  filter: contrast(340%);
 }
-.dark .grain { filter: invert(1); mix-blend-mode: screen; opacity: var(--grain-opacity); }
+.dark .grain { opacity: 0.16; }
 
 /* === Typography === */
 .display {
