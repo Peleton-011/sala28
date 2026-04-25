@@ -1,12 +1,5 @@
 <script setup lang="ts">
-const rows = [
-  ['Networking abierto, lista de 300', 'Lista curada, 40–70 personas'],
-  ['Bebidas y música alta', 'Ambiente de café, conversación posible'],
-  ['Cualquiera puede ponerse a vender', 'Ponentes seleccionados con formulario'],
-  ['Sales con tarjetas, no con ideas', 'Sales con un contacto y un aprendizaje'],
-  ['Eventos genéricos', 'Cada sesión con temática anunciada'],
-  ['Entrada gratuita, calidad incierta', '10–20 €. Cuesta lo justo para que importe'],
-]
+import { diffRows } from '~/data'
 </script>
 
 <template>
@@ -30,10 +23,10 @@ const rows = [
         >
           Sala 28
         </div>
-        <template v-for="(row, i) in rows" :key="i">
+        <template v-for="(row, i) in diffRows" :key="i">
           <div class="diff-row">
-            <div class="diff-cell left">{{ row[0] }}</div>
-            <div class="diff-cell right">{{ row[1] }}</div>
+            <div class="diff-cell left">{{ row.left }}</div>
+            <div class="diff-cell right">{{ row.right }}</div>
           </div>
         </template>
       </div>
