@@ -29,6 +29,7 @@ const intent = ref<Intent>('')
 const submitting = ref(false)
 const submitted = ref(false)
 const submitError = ref('')
+const _hp = ref('')
 
 const data = reactive<FormData>({
   name: '',
@@ -85,7 +86,7 @@ const submit = async () => {
   try {
     await $fetch('/api/apply', {
       method: 'POST',
-      body: { ...data, intent: intent.value },
+      body: { ...data, intent: intent.value, _hp: _hp.value },
     })
     submitted.value = true
   } catch (err: unknown) {
@@ -133,6 +134,8 @@ const submit = async () => {
           </aside>
 
           <form class="reveal" novalidate @submit.prevent="submit">
+            <!-- Honeypot: invisible to humans, filled by bots -->
+            <input v-model="_hp" type="text" name="website" tabindex="-1" aria-hidden="true" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none">
             <div class="field">
               <label>Nombre completo<span class="req">*</span></label>
               <input v-model="data.name" placeholder="María García">

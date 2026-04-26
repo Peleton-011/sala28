@@ -12,6 +12,7 @@ interface ApplyBody {
   project_name?: string
   project_pitch?: string
   contact?: string
+  _hp?: string
 }
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -19,6 +20,9 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
   const body = await readBody<ApplyBody>(event)
+
+  // Honeypot: bots fill hidden fields, humans don't
+  if (body._hp) return { ok: true }
 
   // Server-side validation
   const errs: Record<string, string> = {}
@@ -50,6 +54,21 @@ export default defineEventHandler(async (event) => {
   // Supabase insert
   if (config.supabaseUrl && config.supabaseServiceKey) {
     const supabase = createClient(config.supabaseUrl, config.supabaseServiceKey)
+
+    // Rate limit: one submission per email per 24 hours
+    const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    const { count } = await supabase
+      .from('applications')
+      .select('id', { count: 'exact', head: true })
+      .eq('email', body.email.trim().toLowerCase())
+      .gte('created_at', since)
+    if ((count ?? 0) > 0) {
+      throw createError({
+        statusCode: 429,
+        data: { errors: { email: 'Ya hemos recibido una solicitud con este email. Escríbenos a hola@sala28.es si tienes alguna duda.' } },
+      })
+    }
+
     const { error } = await supabase.from('applications').insert({
       name: body.name.trim(),
       birth_date: body.birth,

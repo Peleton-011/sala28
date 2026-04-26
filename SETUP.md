@@ -49,19 +49,22 @@ Haz esto una sola vez antes de lanzar. El orden importa.
 
 ---
 
-## 5. Hosting — NuxtHub (recomendado) o Vercel
+## 5. Hosting — Vercel (recomendado) o NuxtHub
 
-### NuxtHub
+El repo ya incluye `vercel.json` con las funciones configuradas en Frankfurt (misma región que Supabase).
+
+### Vercel
+- [ ] Crear cuenta en [vercel.com](https://vercel.com)
+- [ ] Importar el repositorio de GitHub → framework detectado automáticamente como **Nuxt.js**
+- [ ] Configurar las variables de entorno de la sección 7 en **Project → Settings → Environment Variables**
+- [ ] Añadir dominio `sala28.es` en **Project → Settings → Domains**
+- [ ] Vercel generará los nameservers a los que apuntar desde tu registrador
+
+### NuxtHub (alternativa, Cloudflare Workers)
 - [ ] Crear cuenta en [hub.nuxt.com](https://hub.nuxt.com)
 - [ ] Conectar repositorio de GitHub
 - [ ] Configurar variables de entorno (ver sección 7)
-- [ ] Apuntar `sala28.es` al dominio que asigna NuxtHub (desde el panel del registrador)
-
-### Vercel (alternativa)
-- [ ] Crear cuenta en [vercel.com](https://vercel.com)
-- [ ] Importar repositorio → framework **Nuxt.js**
-- [ ] Configurar variables de entorno (ver sección 7)
-- [ ] Añadir dominio `sala28.es` en **Project → Domains**
+- [ ] Apuntar `sala28.es` al dominio que asigna NuxtHub
 
 ---
 
@@ -108,7 +111,15 @@ NUXT_ADMIN_TOKEN=cambia_esto_por_una_clave_segura_aleatoria
 
 ---
 
-## 9. Verificación final antes de abrir
+## 9. Google Search Console
+
+- [ ] Ir a [search.google.com/search-console](https://search.google.com/search-console)
+- [ ] Añadir propiedad `sala28.es` → verificar con el método de registro DNS (añadir un TXT record)
+- [ ] Una vez verificado, ir a **Sitemaps** → añadir `https://sala28.es/sitemap.xml`
+
+---
+
+## 10. Verificación final antes de abrir
 
 - [ ] Formulario de solicitud → enviar prueba → comprobar que llega email al equipo
 - [ ] Abrir `/admin/login` → entrar con `NUXT_ADMIN_TOKEN` → ver la solicitud de prueba
