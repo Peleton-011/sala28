@@ -5,6 +5,7 @@ interface ApplyBody {
   name: string
   birth: string
   profession: string
+  email: string
   linkedin?: string
   interest: string
   intent: 'attend' | 'present'
@@ -13,9 +14,7 @@ interface ApplyBody {
   contact?: string
 }
 
-function isEmail(value: string): boolean {
-  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-}
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
 
 export default defineEventHandler(async (event) => {
   const config = useRuntimeConfig()
@@ -31,6 +30,11 @@ export default defineEventHandler(async (event) => {
     if (age < 24) errs.birth = 'Eventos restringidos a +24 años'
   }
   if (!body.profession?.trim()) errs.profession = 'Requerido'
+  if (!body.email?.trim()) {
+    errs.email = 'Requerido'
+  } else if (!EMAIL_RE.test(body.email)) {
+    errs.email = 'Email inválido'
+  }
   if (!body.interest?.trim()) errs.interest = 'Requerido'
   if (!body.intent || !['attend', 'present'].includes(body.intent)) errs.intent = 'Valor inválido'
   if (body.intent === 'present') {
@@ -50,6 +54,7 @@ export default defineEventHandler(async (event) => {
       name: body.name.trim(),
       birth_date: body.birth,
       profession: body.profession.trim(),
+      email: body.email.trim().toLowerCase(),
       linkedin: body.linkedin?.trim() || null,
       interest: body.interest.trim(),
       intent: body.intent,
@@ -70,7 +75,6 @@ export default defineEventHandler(async (event) => {
     const resend = new Resend(config.resendApiKey)
     const teamEmail = config.teamEmail || 'hola@sala28.es'
 
-    // Team notification
     await resend.emails.send({
       from: 'Sala 28 <noreply@sala28.es>',
       to: teamEmail,
@@ -78,15 +82,12 @@ export default defineEventHandler(async (event) => {
       html: buildTeamEmail(body),
     }).catch((e) => console.error('[apply] team email error', e))
 
-    // Presenter confirmation (only if contact looks like an email)
-    if (body.intent === 'present' && body.contact && isEmail(body.contact)) {
-      await resend.emails.send({
-        from: 'Sala 28 <noreply@sala28.es>',
-        to: body.contact,
-        subject: 'Hemos recibido tu solicitud para exponer en Sala 28',
-        html: buildPresenterEmail(body.name),
-      }).catch((e) => console.error('[apply] presenter email error', e))
-    }
+    await resend.emails.send({
+      from: 'Sala 28 <noreply@sala28.es>',
+      to: body.email.trim().toLowerCase(),
+      subject: 'Hemos recibido tu solicitud — Sala 28',
+      html: buildConfirmationEmail(body),
+    }).catch((e) => console.error('[apply] confirmation email error', e))
   } else {
     console.warn('[apply] Resend env var not set — skipping emails')
   }
@@ -95,31 +96,61 @@ export default defineEventHandler(async (event) => {
 })
 
 function buildTeamEmail(body: ApplyBody): string {
-  const rows = [
+  const rows: [string, string][] = [
     ['Nombre', body.name],
-    ['Fecha de nacimiento', body.birth],
+    ['Email', body.email],
+    ['Nacimiento', body.birth],
     ['Profesión', body.profession],
     ['LinkedIn', body.linkedin || '—'],
     ['Interés', body.interest],
     ['Intención', body.intent === 'present' ? 'Exponer' : 'Asistir'],
     ...(body.intent === 'present' ? [
-      ['Proyecto', body.project_name ?? ''],
-      ['Pitch', body.project_pitch ?? ''],
-      ['Contacto', body.contact ?? ''],
+      ['Proyecto', body.project_name ?? ''] as [string, string],
+      ['Pitch', body.project_pitch ?? ''] as [string, string],
+      ['Contacto', body.contact ?? ''] as [string, string],
     ] : []),
   ]
   const rowsHtml = rows.map(([k, v]) =>
-    `<tr><td style="padding:6px 12px 6px 0;color:#888;white-space:nowrap;vertical-align:top">${k}</td><td style="padding:6px 0">${v}</td></tr>`
+    `<tr><td style="padding:6px 12px 6px 0;color:#888;white-space:nowrap;vertical-align:top">${k}</td><td style="padding:6px 0;color:#111">${v}</td></tr>`
   ).join('')
-  return `<table style="font-family:sans-serif;font-size:14px;border-collapse:collapse">${rowsHtml}</table>`
+  return `<div style="font-family:sans-serif;font-size:14px;max-width:600px"><table style="border-collapse:collapse">${rowsHtml}</table></div>`
 }
 
-function buildPresenterEmail(name: string): string {
-  return `
-<div style="font-family:Georgia,serif;max-width:560px;margin:0 auto;padding:40px 24px;color:#1a1a1a">
-  <p style="font-size:18px;margin:0 0 24px">Hola ${name},</p>
-  <p style="line-height:1.6">Hemos recibido tu solicitud para exponer en Sala 28. La revisamos manualmente y te escribiremos en los próximos días.</p>
-  <p style="line-height:1.6">Si tienes alguna pregunta, responde a este correo o escríbenos a <a href="mailto:hola@sala28.es">hola@sala28.es</a>.</p>
-  <p style="margin-top:40px;color:#888;font-size:13px">— El equipo de Sala 28</p>
-</div>`
+function buildConfirmationEmail(body: ApplyBody): string {
+  const isPresenter = body.intent === 'present'
+  return brandedEmail(`
+    <p style="font-size:18px;margin:0 0 20px;font-weight:400">Hola ${body.name},</p>
+    <p style="line-height:1.7;margin:0 0 16px">
+      Hemos recibido tu solicitud para ${isPresenter ? 'exponer en' : 'asistir a'} Sala 28.
+      La revisamos manualmente y te escribiremos en un plazo de cinco días.
+    </p>
+    ${isPresenter ? `<p style="line-height:1.7;margin:0 0 16px">
+      Si tu propuesta es seleccionada, te contactaremos a través de este email para coordinar los detalles.
+    </p>` : ''}
+    <p style="line-height:1.7;margin:0">
+      Si tienes cualquier duda, escríbenos a
+      <a href="mailto:hola@sala28.es" style="color:#636520;text-decoration:none">hola@sala28.es</a>.
+    </p>
+  `)
+}
+
+function brandedEmail(body: string): string {
+  return `<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f0e8">
+  <div style="max-width:560px;margin:40px auto;background:#faf7f2;border:1px solid #e8e0d0;border-radius:4px;overflow:hidden">
+    <div style="background:#1a1a0f;padding:20px 32px;display:flex;align-items:center;gap:12px">
+      <span style="font-family:Georgia,serif;font-size:22px;color:#f5f0e8;letter-spacing:-0.5px">Sala 28</span>
+    </div>
+    <div style="padding:36px 32px;font-family:Georgia,serif;font-size:15px;color:#1a1a1a;line-height:1.6">
+      ${body}
+      <p style="margin:40px 0 0;color:#888;font-size:13px;font-family:sans-serif;border-top:1px solid #e8e0d0;padding-top:20px">
+        — El equipo de Sala 28 &nbsp;·&nbsp;
+        <a href="https://sala28.es" style="color:#636520;text-decoration:none">sala28.es</a>
+      </p>
+    </div>
+  </div>
+</body>
+</html>`
 }

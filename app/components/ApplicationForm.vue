@@ -5,6 +5,7 @@ interface FormData {
   name: string
   birth: string
   profession: string
+  email: string
   linkedin: string
   interest: string
   project_name: string
@@ -16,6 +17,7 @@ interface FormErrors {
   name?: string
   birth?: string
   profession?: string
+  email?: string
   interest?: string
   intent?: string
   project_name?: string
@@ -32,6 +34,7 @@ const data = reactive<FormData>({
   name: '',
   birth: '',
   profession: '',
+  email: '',
   linkedin: '',
   interest: '',
   project_name: '',
@@ -57,6 +60,11 @@ const validate = (): boolean => {
     if (age < 24) e.birth = 'Eventos restringidos a +24 años'
   }
   if (!data.profession.trim()) e.profession = 'Requerido'
+  if (!data.email.trim()) {
+    e.email = 'Requerido'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    e.email = 'Email inválido'
+  }
   if (!data.interest.trim()) e.interest = 'Cuéntanos en una línea'
   if (!intent.value) e.intent = 'Selecciona una opción'
   if (intent.value === 'present') {
@@ -142,6 +150,12 @@ const submit = async () => {
                 <input v-model="data.profession" placeholder="Co-fundadora, Producto">
                 <span class="err">{{ errors.profession }}</span>
               </div>
+            </div>
+
+            <div class="field">
+              <label>Email<span class="req">*</span></label>
+              <input v-model="data.email" type="email" placeholder="tu@email.com">
+              <span class="err">{{ errors.email }}</span>
             </div>
 
             <div class="field">

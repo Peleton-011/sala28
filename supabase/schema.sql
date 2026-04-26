@@ -12,6 +12,7 @@ create table if not exists applications (
   name            text        not null,
   birth_date      date        not null,
   profession      text        not null,
+  email           text        not null,
   linkedin        text,
   interest        text        not null,
 
@@ -43,3 +44,9 @@ create index if not exists applications_intent_idx    on applications (intent);
 alter table applications enable row level security;
 
 -- Sin políticas públicas: solo accesible con service_role desde el servidor.
+
+-- ============================================================
+-- Migración: añadir columna email (si la tabla ya existe)
+-- Ejecutar solo si el proyecto ya estaba en producción sin email
+-- ============================================================
+-- alter table applications add column if not exists email text not null default '';

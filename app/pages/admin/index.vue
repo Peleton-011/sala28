@@ -7,6 +7,7 @@ interface Application {
   name: string
   birth_date: string
   profession: string
+  email: string
   linkedin: string | null
   interest: string
   intent: 'attend' | 'present'
@@ -261,6 +262,11 @@ onMounted(load)
 
           <!-- Fields -->
           <dl class="fields">
+            <dt>Email</dt>
+            <dd>
+              <a :href="`mailto:${detail.email}`" class="link">{{ detail.email }}</a>
+            </dd>
+
             <dt>Profesión</dt>
             <dd>{{ detail.profession }}</dd>
 
