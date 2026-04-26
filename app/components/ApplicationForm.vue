@@ -26,6 +26,7 @@ interface FormErrors {
 const intent = ref<Intent>('')
 const submitting = ref(false)
 const submitted = ref(false)
+const submitError = ref('')
 
 const data = reactive<FormData>({
   name: '',
@@ -71,12 +72,24 @@ const validate = (): boolean => {
 const submit = async () => {
   if (!validate()) return
   submitting.value = true
+  submitError.value = ''
 
-  // TODO: replace with real API call (email / Supabase / Google Drive)
-  await new Promise((resolve) => setTimeout(resolve, 800))
-
-  submitting.value = false
-  submitted.value = true
+  try {
+    await $fetch('/api/apply', {
+      method: 'POST',
+      body: { ...data, intent: intent.value },
+    })
+    submitted.value = true
+  } catch (err: unknown) {
+    const e = err as { data?: { errors?: Record<string, string> }; message?: string }
+    if (e?.data?.errors) {
+      Object.assign(errors, e.data.errors)
+    } else {
+      submitError.value = e?.message ?? 'Error al enviar la solicitud. Inténtalo de nuevo.'
+    }
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
@@ -191,6 +204,7 @@ const submit = async () => {
             </div>
 
             <div class="submit-row">
+              <p v-if="submitError" class="err" style="margin-bottom: 12px">{{ submitError }}</p>
               <p class="note">Al enviar aceptas que tus datos sean tratados para gestionar la solicitud. Sin newsletter automática.</p>
               <button type="submit" class="btn" :disabled="submitting">
                 {{ submitting ? 'Enviando…' : 'Enviar solicitud' }}
