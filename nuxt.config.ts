@@ -7,6 +7,10 @@ export default defineNuxtConfig({
     supabaseServiceKey: '',
     resendApiKey: '',
     teamEmail: 'hola@sala28.es',
+    public: {
+      siteUrl: 'https://sala28.es',
+      plausibleDomain: '',
+    },
   },
   css: ['~/assets/css/main.css'],
   app: {
