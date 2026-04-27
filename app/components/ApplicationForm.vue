@@ -115,8 +115,8 @@ const submit = async () => {
         <div class="success" style="max-width: 640px; margin: 0 auto;">
           <h3>Tu solicitud está en revisión.</h3>
           <p style="margin: 0 auto; color: var(--ink-soft);">
-            Te escribiremos en menos de cinco días desde <em>hola@sala28.es</em>.
-            Si te has presentado para exponer, la respuesta puede tomar algunos días más.
+            Revisamos cada solicitud manualmente. Nos pondremos en contacto contigo
+            en los próximos días si hay un sitio para ti.
           </p>
         </div>
       </template>

@@ -7,7 +7,7 @@ Haz esto una sola vez antes de lanzar. El orden importa.
 ## 1. Dominio
 
 - [ ] Registrar `sala28.es` en un registrador (Namecheap, Porkbun, etc. ~12 €/año)
-- [ ] Apuntar los nameservers al proveedor de hosting (ver paso 5)
+- [ ] Apuntar los nameservers al proveedor de hosting (ver paso 4)
 
 ---
 
@@ -39,36 +39,26 @@ Haz esto una sola vez antes de lanzar. El orden importa.
 
 ---
 
-## 4. Resend (emails transaccionales)
-
-- [ ] Crear cuenta en [resend.com](https://resend.com)
-- [ ] Ir a **Domains** → añadir `sala28.es`
-- [ ] Añadir los registros DNS que indica Resend (SPF, DKIM, DMARC)
-- [ ] Esperar verificación (puede tardar unos minutos)
-- [ ] Ir a **API Keys** → crear clave → copiar a `NUXT_RESEND_API_KEY`
-
----
-
-## 5. Hosting — Vercel (recomendado) o NuxtHub
+## 4. Hosting — Vercel (recomendado) o NuxtHub
 
 El repo ya incluye `vercel.json` con las funciones configuradas en Frankfurt (misma región que Supabase).
 
 ### Vercel
 - [ ] Crear cuenta en [vercel.com](https://vercel.com)
 - [ ] Importar el repositorio de GitHub → framework detectado automáticamente como **Nuxt.js**
-- [ ] Configurar las variables de entorno de la sección 7 en **Project → Settings → Environment Variables**
+- [ ] Configurar las variables de entorno de la sección 6 en **Project → Settings → Environment Variables**
 - [ ] Añadir dominio `sala28.es` en **Project → Settings → Domains**
 - [ ] Vercel generará los nameservers a los que apuntar desde tu registrador
 
 ### NuxtHub (alternativa, Cloudflare Workers)
 - [ ] Crear cuenta en [hub.nuxt.com](https://hub.nuxt.com)
 - [ ] Conectar repositorio de GitHub
-- [ ] Configurar variables de entorno (ver sección 7)
+- [ ] Configurar variables de entorno (ver sección 6)
 - [ ] Apuntar `sala28.es` al dominio que asigna NuxtHub
 
 ---
 
-## 6. Plausible Analytics
+## 5. Plausible Analytics
 
 - [ ] Crear cuenta en [plausible.io](https://plausible.io) ($9/mes)
 - [ ] Añadir sitio `sala28.es`
@@ -76,20 +66,14 @@ El repo ya incluye `vercel.json` con las funciones configuradas en Frankfurt (mi
 
 ---
 
-## 7. Variables de entorno
+## 6. Variables de entorno
 
-Crear archivo `.env` en la raíz del proyecto (o configurar en el panel del hosting):
+Configurar en el panel del hosting (Vercel → Project → Settings → Environment Variables):
 
 ```bash
 # Supabase
 NUXT_SUPABASE_URL=https://xxxxxxxxxxxx.supabase.co
 NUXT_SUPABASE_SERVICE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6...
-
-# Resend
-NUXT_RESEND_API_KEY=re_xxxxxxxxxxxxxxxxxxxx
-
-# Email del equipo
-NUXT_TEAM_EMAIL=hola@sala28.es
 
 # URL pública (para OG tags y canonical)
 NUXT_PUBLIC_SITE_URL=https://sala28.es
@@ -103,15 +87,15 @@ NUXT_ADMIN_TOKEN=cambia_esto_por_una_clave_segura_aleatoria
 
 ---
 
-## 8. Imagen OG (`/og-image.png`)
+## 7. Imagen OG (`/og-image.png`)
 
 - [ ] Abrir `public/og-image.svg` en el navegador
 - [ ] Hacer screenshot a 1200×630 px, guardar como `public/og-image.png`
-- [ ] O usar [svgomg](https://jakearchibald.github.io/svgomg/) + herramienta de conversión online
+- [ ] O usar cualquier herramienta de conversión SVG→PNG online
 
 ---
 
-## 9. Google Search Console
+## 8. Google Search Console
 
 - [ ] Ir a [search.google.com/search-console](https://search.google.com/search-console)
 - [ ] Añadir propiedad `sala28.es` → verificar con el método de registro DNS (añadir un TXT record)
@@ -119,11 +103,10 @@ NUXT_ADMIN_TOKEN=cambia_esto_por_una_clave_segura_aleatoria
 
 ---
 
-## 10. Verificación final antes de abrir
+## 9. Verificación final antes de abrir
 
-- [ ] Formulario de solicitud → enviar prueba → comprobar que llega email al equipo
-- [ ] Abrir `/admin/login` → entrar con `NUXT_ADMIN_TOKEN` → ver la solicitud de prueba
-- [ ] Aceptar la solicitud de prueba → comprobar que llega email de confirmación al solicitante
+- [ ] Formulario de solicitud → enviar prueba → comprobar que aparece en `/admin`
+- [ ] Abrir `/admin/login` → entrar con `NUXT_ADMIN_TOKEN` → cambiar estado de la solicitud de prueba
 - [ ] Compartir la URL en WhatsApp → comprobar que aparece la tarjeta OG con imagen
 - [ ] Comprobar que `sala28.es/robots.txt` es accesible
 - [ ] Comprobar que las fuentes cargan (Cormorant, EB Garamond, JetBrains Mono)

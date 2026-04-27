@@ -5,8 +5,6 @@ export default defineNuxtConfig({
   runtimeConfig: {
     supabaseUrl: '',
     supabaseServiceKey: '',
-    resendApiKey: '',
-    teamEmail: 'hola@sala28.es',
     adminToken: '',
     public: {
       siteUrl: 'https://sala28.es',
