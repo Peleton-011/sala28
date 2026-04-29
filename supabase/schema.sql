@@ -50,3 +50,18 @@ alter table applications enable row level security;
 -- Ejecutar solo si el proyecto ya estaba en producción sin email
 -- ============================================================
 -- alter table applications add column if not exists email text not null default '';
+
+-- ============================================================
+-- Comentarios internos del equipo
+-- ============================================================
+create table if not exists comments (
+  id              uuid        primary key default gen_random_uuid(),
+  created_at      timestamptz not null    default now(),
+  application_id  uuid        not null    references applications(id) on delete cascade,
+  author          text        not null    default 'Equipo',
+  body            text        not null
+);
+
+create index if not exists comments_application_id_idx on comments (application_id, created_at);
+
+alter table comments enable row level security;

@@ -18,6 +18,14 @@ interface Application {
   notes: string | null
 }
 
+interface Comment {
+  id: string
+  created_at: string
+  application_id: string
+  author: string
+  body: string
+}
+
 const getHeaders = () => ({
   Authorization: `Bearer ${sessionStorage.getItem('admin_token') ?? ''}`,
 })
@@ -29,8 +37,11 @@ const activeStatus = ref('pending')
 const activeIntent = ref('all')
 const hoveredId = ref<string | null>(null)
 const detail = ref<Application | null>(null)
-const notesText = ref('')
-const savingNotes = ref(false)
+const comments = ref<Comment[]>([])
+const loadingComments = ref(false)
+const newComment = ref('')
+const newAuthor = ref('')
+const postingComment = ref(false)
 
 const filtered = computed(() =>
   apps.value.filter(
@@ -68,18 +79,28 @@ async function setStatus(app: Application, status: Application['status']) {
   patch(updated)
 }
 
-async function saveNotes() {
-  if (!detail.value) return
-  savingNotes.value = true
+async function loadComments(id: string) {
+  loadingComments.value = true
   try {
-    const updated = await $fetch<Application>(`/api/admin/applications/${detail.value.id}`, {
-      method: 'PATCH',
-      headers: getHeaders(),
-      body: { notes: notesText.value },
-    })
-    patch(updated)
+    comments.value = await $fetch<Comment[]>(`/api/admin/applications/${id}/comments`, { headers: getHeaders() })
   } finally {
-    savingNotes.value = false
+    loadingComments.value = false
+  }
+}
+
+async function postComment() {
+  if (!detail.value || !newComment.value.trim()) return
+  postingComment.value = true
+  try {
+    const created = await $fetch<Comment>(`/api/admin/applications/${detail.value.id}/comments`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: { body: newComment.value, author: newAuthor.value || 'Equipo' },
+    })
+    comments.value.push(created)
+    newComment.value = ''
+  } finally {
+    postingComment.value = false
   }
 }
 
@@ -91,7 +112,9 @@ function patch(updated: Application) {
 
 function openDetail(app: Application) {
   detail.value = app
-  notesText.value = app.notes ?? ''
+  comments.value = []
+  newComment.value = ''
+  loadComments(app.id)
 }
 
 function logout() {
@@ -101,6 +124,9 @@ function logout() {
 
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' })
+
+const fmtDateTime = (iso: string) =>
+  new Date(iso).toLocaleString('es-ES', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 
 const STATUS_LABEL: Record<string, string> = {
   pending: 'Pendiente',
@@ -308,17 +334,40 @@ onMounted(load)
             </template>
           </dl>
 
-          <!-- Internal notes -->
+          <!-- Internal comments thread -->
           <div class="notes-section">
-            <label class="notes-label">Notas internas</label>
-            <textarea
-              v-model="notesText"
-              class="notes-textarea"
-              placeholder="Solo visible para el equipo…"
-            />
-            <button class="notes-save" :disabled="savingNotes" @click="saveNotes">
-              {{ savingNotes ? 'Guardando…' : 'Guardar nota' }}
-            </button>
+            <label class="notes-label">Comentarios del equipo</label>
+
+            <div v-if="loadingComments" class="comments-empty">Cargando…</div>
+            <div v-else-if="comments.length === 0" class="comments-empty">Sin comentarios todavía.</div>
+            <ul v-else class="comments-list">
+              <li v-for="c in comments" :key="c.id" class="comment">
+                <div class="comment-meta">
+                  <span class="comment-author">{{ c.author }}</span>
+                  <span class="comment-time">{{ fmtDateTime(c.created_at) }}</span>
+                </div>
+                <p class="comment-body">{{ c.body }}</p>
+              </li>
+            </ul>
+
+            <div class="comment-form">
+              <input
+                v-model="newAuthor"
+                class="comment-author-input"
+                placeholder="Tu nombre (opcional)"
+              />
+              <textarea
+                v-model="newComment"
+                class="notes-textarea"
+                placeholder="Añadir comentario…"
+                rows="3"
+                @keydown.meta.enter="postComment"
+                @keydown.ctrl.enter="postComment"
+              />
+              <button class="notes-save" :disabled="postingComment || !newComment.trim()" @click="postComment">
+                {{ postingComment ? 'Enviando…' : 'Añadir comentario' }}
+              </button>
+            </div>
           </div>
         </div>
       </aside>
@@ -620,4 +669,65 @@ onMounted(load)
 }
 .notes-save:hover:not(:disabled) { background: #374151; }
 .notes-save:disabled { opacity: 0.5; cursor: default; }
+
+/* Comment thread */
+.comments-empty {
+  font-size: 13px;
+  color: #9ca3af;
+  margin-bottom: 12px;
+}
+.comments-list {
+  list-style: none;
+  margin: 0 0 16px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.comment {
+  background: #f9fafb;
+  border: 1px solid #f3f4f6;
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.comment-author {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+}
+.comment-time {
+  font-size: 11px;
+  color: #9ca3af;
+}
+.comment-body {
+  margin: 0;
+  font-size: 13px;
+  color: #111827;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+.comment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.comment-author-input {
+  width: 100%;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 7px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  outline: none;
+  box-sizing: border-box;
+  color: #111827;
+  transition: border-color 0.15s;
+}
+.comment-author-input:focus { border-color: #636520; }
 </style>
