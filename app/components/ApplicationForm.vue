@@ -5,6 +5,7 @@ interface FormData {
   name: string
   birth: string
   profession: string
+  email: string
   linkedin: string
   interest: string
   project_name: string
@@ -16,6 +17,7 @@ interface FormErrors {
   name?: string
   birth?: string
   profession?: string
+  email?: string
   interest?: string
   intent?: string
   project_name?: string
@@ -26,11 +28,14 @@ interface FormErrors {
 const intent = ref<Intent>('')
 const submitting = ref(false)
 const submitted = ref(false)
+const submitError = ref('')
+const _hp = ref('')
 
 const data = reactive<FormData>({
   name: '',
   birth: '',
   profession: '',
+  email: '',
   linkedin: '',
   interest: '',
   project_name: '',
@@ -56,6 +61,11 @@ const validate = (): boolean => {
     if (age < 24) e.birth = 'Eventos restringidos a +24 años'
   }
   if (!data.profession.trim()) e.profession = 'Requerido'
+  if (!data.email.trim()) {
+    e.email = 'Requerido'
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+    e.email = 'Email inválido'
+  }
   if (!data.interest.trim()) e.interest = 'Cuéntanos en una línea'
   if (!intent.value) e.intent = 'Selecciona una opción'
   if (intent.value === 'present') {
@@ -71,12 +81,24 @@ const validate = (): boolean => {
 const submit = async () => {
   if (!validate()) return
   submitting.value = true
+  submitError.value = ''
 
-  // TODO: replace with real API call (email / Supabase / Google Drive)
-  await new Promise((resolve) => setTimeout(resolve, 800))
-
-  submitting.value = false
-  submitted.value = true
+  try {
+    await $fetch('/api/apply', {
+      method: 'POST',
+      body: { ...data, intent: intent.value, _hp: _hp.value },
+    })
+    submitted.value = true
+  } catch (err: unknown) {
+    const e = err as { data?: { errors?: Record<string, string> }; message?: string }
+    if (e?.data?.errors) {
+      Object.assign(errors, e.data.errors)
+    } else {
+      submitError.value = e?.message ?? 'Error al enviar la solicitud. Inténtalo de nuevo.'
+    }
+  } finally {
+    submitting.value = false
+  }
 }
 </script>
 
@@ -93,8 +115,8 @@ const submit = async () => {
         <div class="success" style="max-width: 640px; margin: 0 auto;">
           <h3>Tu solicitud está en revisión.</h3>
           <p style="margin: 0 auto; color: var(--ink-soft);">
-            Te escribiremos en menos de cinco días desde <em>hola@sala28.es</em>.
-            Si te has presentado para exponer, la respuesta puede tomar algunos días más.
+            Revisamos cada solicitud manualmente. Nos pondremos en contacto contigo
+            en los próximos días si hay un sitio para ti.
           </p>
         </div>
       </template>
@@ -112,6 +134,8 @@ const submit = async () => {
           </aside>
 
           <form class="reveal" novalidate @submit.prevent="submit">
+            <!-- Honeypot: invisible to humans, filled by bots -->
+            <input v-model="_hp" type="text" name="website" tabindex="-1" aria-hidden="true" autocomplete="off" style="position:absolute;left:-9999px;width:1px;height:1px;opacity:0;pointer-events:none">
             <div class="field">
               <label>Nombre completo<span class="req">*</span></label>
               <input v-model="data.name" placeholder="María García">
@@ -129,6 +153,12 @@ const submit = async () => {
                 <input v-model="data.profession" placeholder="Co-fundadora, Producto">
                 <span class="err">{{ errors.profession }}</span>
               </div>
+            </div>
+
+            <div class="field">
+              <label>Email<span class="req">*</span></label>
+              <input v-model="data.email" type="email" placeholder="tu@email.com">
+              <span class="err">{{ errors.email }}</span>
             </div>
 
             <div class="field">
@@ -191,6 +221,7 @@ const submit = async () => {
             </div>
 
             <div class="submit-row">
+              <p v-if="submitError" class="err" style="margin-bottom: 12px">{{ submitError }}</p>
               <p class="note">Al enviar aceptas que tus datos sean tratados para gestionar la solicitud. Sin newsletter automática.</p>
               <button type="submit" class="btn" :disabled="submitting">
                 {{ submitting ? 'Enviando…' : 'Enviar solicitud' }}
