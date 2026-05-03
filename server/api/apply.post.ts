@@ -88,5 +88,11 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 500, message: 'Error al guardar la solicitud' })
   }
 
+  await sendConfirmation({
+    name: body.name.trim(),
+    email: body.email.trim().toLowerCase(),
+    intent: body.intent,
+  }).catch((err) => console.error('[apply] confirmation email error', err))
+
   return { ok: true }
 })

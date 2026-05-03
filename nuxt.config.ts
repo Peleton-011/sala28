@@ -6,6 +6,8 @@ export default defineNuxtConfig({
     supabaseUrl: '',
     supabaseServiceKey: '',
     adminToken: '',
+    resendApiKey: '',
+    emailFrom: 'Sala 28 <hola@sala28.es>',
     public: {
       siteUrl: 'https://sala28.es',
       plausibleDomain: '',

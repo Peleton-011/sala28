@@ -25,5 +25,12 @@ export default defineEventHandler(async (event) => {
     .single()
   if (error) throw createError({ statusCode: 500, message: error.message })
 
+  if (update.status === 'accepted' || update.status === 'rejected') {
+    await sendDecision(
+      { name: data.name, email: data.email, intent: data.intent },
+      update.status as 'accepted' | 'rejected',
+    ).catch((err) => console.error('[patch] decision email error', err))
+  }
+
   return data
 })

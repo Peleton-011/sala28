@@ -24,7 +24,19 @@ Haz esto una sola vez antes de lanzar. El orden importa.
 
 ---
 
-## 3. Supabase
+## 3. Resend (email transaccional)
+
+- [ ] Crear cuenta en [resend.com](https://resend.com)
+- [ ] Ir a **Domains** → añadir `sala28.es` → seguir el wizard para añadir los registros DNS (SPF, DKIM, DMARC) en tu registrador
+- [ ] Esperar a que el dominio quede verificado (puede tardar unos minutos)
+- [ ] Ir a **API Keys** → crear una nueva key → copiarla como `NUXT_RESEND_API_KEY`
+- [ ] El remitente será `hola@sala28.es` — asegúrate de que el buzón existe antes (paso 2)
+
+> **Importante:** hasta que el dominio esté verificado en Resend, los emails solo pueden mandarse a direcciones del propio equipo. No actives el formulario en producción antes de verificar el dominio.
+
+---
+
+## 4. Supabase
 
 - [ ] Crear cuenta en [supabase.com](https://supabase.com)
 - [ ] Crear nuevo proyecto → región **eu-central-1 (Frankfurt)**
@@ -39,7 +51,7 @@ Haz esto una sola vez antes de lanzar. El orden importa.
 
 ---
 
-## 4. Hosting — Vercel (recomendado) o NuxtHub
+## 5. Hosting — Vercel (recomendado) o NuxtHub
 
 El repo ya incluye `vercel.json` con las funciones configuradas en Frankfurt (misma región que Supabase).
 
@@ -58,7 +70,7 @@ El repo ya incluye `vercel.json` con las funciones configuradas en Frankfurt (mi
 
 ---
 
-## 5. Plausible Analytics
+## 6. Plausible Analytics
 
 - [ ] Crear cuenta en [plausible.io](https://plausible.io) ($9/mes)
 - [ ] Añadir sitio `sala28.es`
@@ -66,7 +78,7 @@ El repo ya incluye `vercel.json` con las funciones configuradas en Frankfurt (mi
 
 ---
 
-## 6. Variables de entorno
+## 7. Variables de entorno
 
 Configurar en el panel del hosting (Vercel → Project → Settings → Environment Variables):
 
@@ -83,11 +95,15 @@ NUXT_PUBLIC_PLAUSIBLE_DOMAIN=sala28.es
 
 # Admin panel — genera con: openssl rand -base64 32
 NUXT_ADMIN_TOKEN=cambia_esto_por_una_clave_segura_aleatoria
+
+# Resend
+NUXT_RESEND_API_KEY=re_...
+NUXT_EMAIL_FROM=Sala 28 <hola@sala28.es>
 ```
 
 ---
 
-## 7. Imagen OG (`/og-image.png`)
+## 8. Imagen OG (`/og-image.png`)
 
 - [ ] Abrir `public/og-image.svg` en el navegador
 - [ ] Hacer screenshot a 1200×630 px, guardar como `public/og-image.png`
@@ -95,7 +111,7 @@ NUXT_ADMIN_TOKEN=cambia_esto_por_una_clave_segura_aleatoria
 
 ---
 
-## 8. Google Search Console
+## 9. Google Search Console
 
 - [ ] Ir a [search.google.com/search-console](https://search.google.com/search-console)
 - [ ] Añadir propiedad `sala28.es` → verificar con el método de registro DNS (añadir un TXT record)
@@ -103,7 +119,7 @@ NUXT_ADMIN_TOKEN=cambia_esto_por_una_clave_segura_aleatoria
 
 ---
 
-## 9. Verificación final antes de abrir
+## 10. Verificación final antes de abrir
 
 - [ ] Formulario de solicitud → enviar prueba → comprobar que aparece en `/admin`
 - [ ] Abrir `/admin/login` → entrar con `NUXT_ADMIN_TOKEN` → cambiar estado de la solicitud de prueba
