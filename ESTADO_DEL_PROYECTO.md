@@ -38,7 +38,8 @@ El botón en la cabecera permite cambiar entre fondo claro y fondo oscuro. La pr
 1. El servidor comprueba que todos los datos son correctos.
 2. Verifica que ese email no haya enviado otra solicitud en las últimas 24 horas (para evitar duplicados).
 3. Guarda la solicitud en la base de datos.
-4. Manda automáticamente un email al solicitante confirmando que se ha recibido su solicitud y que le responderéis en menos de cinco días.
+
+Por ahora el solicitante no recibe ningún email automático de confirmación — hay que escribirle manualmente. Los emails automáticos están desarrollados pero pendientes de activar (ver sección de emails más abajo).
 
 Todo esto ocurre en menos de un segundo y sin intervención manual.
 
@@ -55,16 +56,18 @@ Una tabla con todas las solicitudes recibidas, ordenadas de la más reciente a l
 Al pulsar sobre una fila se abre un panel lateral con todos los datos de ese solicitante: datos personales, su motivación, el proyecto que quiere presentar (si aplica), su LinkedIn, etc.
 
 **Cambiar el estado**
-Desde ese panel se puede marcar la solicitud como aceptada, rechazada o volver a pendiente con un solo clic. En el momento en que se acepta o rechaza, la persona recibe automáticamente un email comunicándoselo.
+Desde ese panel se puede marcar la solicitud como aceptada, rechazada o volver a pendiente con un solo clic. De momento el solicitante no recibe ningún email automático al cambiar el estado — hay que escribirle manualmente desde `hola@sala28.es`. Cuando se configure Resend, esto pasará a ser automático.
 
 **Comentarios internos del equipo**
 En el panel de cada solicitud hay una sección de comentarios donde cualquier miembro del equipo puede dejar una nota visible solo para vosotros. Los comentarios se acumulan (nadie puede borrar lo que escribió otro), aparecen con nombre de quien lo escribió y hora.
 
 ---
 
-### Emails automáticos
+### Emails automáticos *(desarrollados, pendientes de activar)*
 
-Hay dos emails que el sistema envía sin que nadie tenga que hacer nada:
+El sistema tiene preparados tres emails automáticos diseñados con la identidad visual de Sala 28, pero **aún no están activos** porque falta configurar el servicio de envío (Resend) y el dominio de correo. Por ahora hay que responder manualmente.
+
+Una vez configurado, el sistema enviará sin intervención del equipo:
 
 | Cuándo se envía | A quién | Asunto |
 |---|---|---|
@@ -72,7 +75,7 @@ Hay dos emails que el sistema envía sin que nadie tenga que hacer nada:
 | Al marcar como aceptado | Al solicitante | "¡Tu plaza en Sala 28 está confirmada!" |
 | Al marcar como rechazado | Al solicitante | "Actualización sobre tu solicitud a Sala 28" |
 
-Los emails van firmados como `hola@sala28.es` y están diseñados con la identidad visual de Sala 28.
+Para activarlos: crear cuenta en Resend, verificar el dominio `sala28.es` y añadir la clave API al hosting (ver checklist de lanzamiento).
 
 ---
 
@@ -148,11 +151,11 @@ La página ya usa **Supabase**.
 
 Los emails de confirmación y de decisión (aceptado/rechazado) los envía un servicio especializado en esto. No es el buzón de correo del equipo — es un servicio que garantiza que los emails lleguen a la bandeja de entrada y no al spam.
 
-La página ya usa **Resend**.
+La página ya tiene el código de emails preparado y usa **Resend** como servicio, pero falta completar la configuración para que funcione en producción.
 
 | Servicio | Precio | Pros | Contras |
 |---|---|---|---|
-| **Resend** ✅ *en uso* | Gratis hasta 3.000 emails/mes, luego 20 $/mes | Moderno, fácil de configurar, excelente entregabilidad, integración sencilla | Relativamente nuevo en el mercado |
+| **Resend** ⚙️ *pendiente de activar* | Gratis hasta 3.000 emails/mes, luego 20 $/mes | Moderno, fácil de configurar, excelente entregabilidad, integración sencilla | Relativamente nuevo en el mercado |
 | **Brevo** (antes Sendinblue) | Gratis 300/día | Bien establecido, orientado también a newsletters | Interfaz más compleja |
 | **Postmark** | 15 $/mes (10.000 emails) | Muy buena reputación, enfocado en transaccional | No tiene plan gratuito útil |
 
@@ -235,7 +238,7 @@ El dominio es la dirección web (`sala28.es`). Hay que registrarlo y renovarlo a
 |---|---|---|---|
 | Hosting (Vercel) | Listo para activar | 0 €/mes | 0 €/mes |
 | Base de datos (Supabase) | En uso | 0 €/mes | 0 €/mes |
-| Email transaccional (Resend) | En uso | 0 €/mes | 0 €/mes |
+| Email transaccional (Resend) | Desarrollado, pendiente de activar | 0 €/mes | 0 €/mes |
 | Buzón `hola@sala28.es` | Pendiente de crear | 0 €/mes (Zoho) | ~6 €/mes (Google) |
 | Analíticas (Plausible) | Listo, pendiente de activar | 0 €/mes (Umami) | ~9 $/mes |
 | Pagos | Luma (ya en uso) | Solo % por entrada | Solo % por entrada |
